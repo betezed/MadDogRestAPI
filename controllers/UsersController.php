@@ -23,7 +23,8 @@ class UsersController extends MyController
                                 ON r.user_id_1 = u.id
                             WHERE r.user_id_2 = :id
                         ');
-                        $request->db->bind(':id', $user_id);
+                        $params['id'] = $user_id;
+                        $request->db->bind($params);
                         $data['data'] = $request->db->fetchall();
                         $data['error'] = false;
                         break;
@@ -35,7 +36,8 @@ class UsersController extends MyController
                     }
                 } else {
                     $request->db->query('SELECT * FROM users WHERE id = :id');
-                    $request->db->bind(':id', $user_id);
+                    $params['id'] = $user_id;
+                    $request->db->bind($params);
                     $data['data'] = $request->db->fetchall();
                     unset($data['data'][0]['password']);
                     $data['error'] = false;
@@ -46,7 +48,8 @@ class UsersController extends MyController
                 else
                     $query = $request->url_elements[2];        
                 $request->db->query('SELECT id, pseudo AS handle FROM users WHERE pseudo LIKE :handle ORDER BY pseudo ASC');
-                $request->db->bind(':handle', '%' . $query . '%');
+                $params['handle'] = '%' . $query . '%';
+                $request->db->bind($params);
                 $data['data'] = $request->db->fetchall();
                 $data['error'] = false;
             }
@@ -71,15 +74,17 @@ class UsersController extends MyController
                 $handle = $parameters['handle'];
                 $password = $parameters['password'];
                 $request->db->query('SELECT pseudo FROM users WHERE pseudo = :handle');
-                $request->db->bind(':handle', $handle);
+                $params['handle'] = $handle;
+                $request->db->bind($params);
                 $request->db->execute();
                 if ($request->db->rowCount() > 0) {
                     $data['error'] = 'This login is not available';
                     $data['data'] = false;
                 } else {
                     $request->db->query('INSERT INTO users VALUES ("", :handle, :password, NOW(), NOW(), 0, 0)');
-                    $request->db->bind(':handle', $handle);
-                    $request->db->bind(':password', $password);
+                    $params['handle'] = $handle;
+                    $params['password'] = $password;
+                    $request->db->bind($params);
                     $request->db->execute();
                     $data['data']['id'] = $request->db->lastInsertId();
                     $data['error'] = false;
@@ -95,23 +100,26 @@ class UsersController extends MyController
                     } else {
                         $friend_id = $parameters['id'];
                         $request->db->query('SELECT id FROM users WHERE id = :id');
-                        $request->db->bind(':id', $friend_id);
+                        $params['id'] = $friend_id;
+                        $request->db->bind($params);
                         $request->db->execute();
                         if ($request->db->rowCount() == 0) {
                             $data['error'] = 'This login does not exist';
                             $data['data'] = false;
                         } else {
                             $request->db->query('SELECT id FROM relations WHERE (user_id_1 = :uid AND user_id_2 = :fid) OR (user_id_1 = :fid AND user_id_2 = :uid)');
-                            $request->db->bind(':uid', $user_id);
-                            $request->db->bind(':fid', $friend_id);
+                            $params['uid'] = $user_id;
+                            $params['fid'] = $friend_id;
+                            $request->db->bind($params);
                             $request->db->execute();
                             if($request->db->rowCount() > 0) {
                                 $data['error'] = 'User ' . $user_id . ' and user ' . $friend_id . ' are already friends';
                                 $data['data'] = false;
                             } else {
                                 $request->db->query('INSERT INTO relations VALUES ("", :uid, :fid, 0, NOW(), NOW())');
-                                $request->db->bind(':uid', $user_id);
-                                $request->db->bind(':fid', $friend_id);
+                                $params['uid'] = $user_id;
+                                $params['fid'] = $friend_id;
+                                $request->db->bind($params);
                                 $request->db->execute();
                                 $data['error'] = false;
                                 $data['message'] = 'Friend has been added successfully';
@@ -138,15 +146,17 @@ class UsersController extends MyController
             } else {
                 $password = $parameters['password'];
                 $request->db->query('SELECT pseudo FROM users WHERE id = :id');
-                $request->db->bind(':id', $user_id);
+                $params['id'] = $user_id;
+                $request->db->bind($params);
                 $request->db->execute();
                 if ($request->db->rowCount() == 0) {
                     $data['error'] = 'This login does not exist.';
                     $data['data'] = false;
                 } else {
                     $request->db->query('UPDATE users SET password = :password WHERE id = :id');
-                    $request->db->bind(':id', $user_id);
-                    $request->db->bind(':password', $password);
+                    $params['id'] = $user_id;
+                    $params['password'] = $password;
+                    $request->db->bind($params);
                     $request->db->execute();
                     $data['error'] = false;
                     $data['message'] = 'User has been updated successfully';
@@ -165,17 +175,20 @@ class UsersController extends MyController
             $user_id = (int)$request->url_elements[1];
             $parameters = $request->parameters;
             $request->db->query('SELECT id FROM users WHERE id = :id');
-            $request->db->bind(':id', $user_id);
+            $params['id'] = $user_id;
+            $request->db->bind($params);
             $request->db->execute();
             if ($request->db->rowCount() == 0) {
                 $data['error'] = 'This login does not exist.';
                 $data['data'] = false;
             } else {
                 $request->db->query('DELETE FROM users WHERE id = :id');
-                $request->db->bind(':id', $user_id);
+                $params['id'] = $user_id;
+                $request->db->bind($params);
                 $request->db->execute();
                 $request->db->query('DELETE FROM relations WHERE user_id_1 = :id OR user_id_2 = :id');
-                $request->db->bind(':id', $user_id);
+                $params['id'] = $user_id;
+                $request->db->bind($params);
                 $request->db->execute();
                 $data['error'] = false;
                 $data['message'] = 'User has been deleted successfully';

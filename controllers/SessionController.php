@@ -10,8 +10,9 @@ class SessionController extends MyController {
             $handle = $parameters['handle'];
             $password = $parameters['password'];
             $request->db->query('SELECT id, pseudo AS handle FROM users WHERE pseudo = :handle AND password = :password');
-            $request->db->bind(':handle', $handle);
-            $request->db->bind(':password', $password);
+            $params['handle'] = $handle;
+            $params['password'] = $password;
+            $request->db->bind($params);
             $result = $request->db->fetchall();
             if ($request->db->rowCount() != 1) {
                 $data['error'] = 'Wrong combination login/password';

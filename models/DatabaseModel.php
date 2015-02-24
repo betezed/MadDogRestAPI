@@ -28,23 +28,26 @@ class DataBaseModel {
     public function query($query) {
         $this->stmt = $this->dbh->prepare($query);
     }
-    public function bind($param, $value, $type = null){
-        if (is_null($type)) {
-            switch (true) {
-                case is_int($value):
-                    $type = PDO::PARAM_INT;
-                    break;
-                case is_bool($value):
-                    $type = PDO::PARAM_BOOL;
-                    break;
-                case is_null($value):
-                    $type = PDO::PARAM_NULL;
-                    break;
-                default:
-                    $type = PDO::PARAM_STR;
-            }
-        }  
-        $this->stmt->bindValue($param, $value, $type);
+    public function bind($params, $type = null){
+        foreach ($params as $key => $value) {
+            $key = ":" . $key;
+            if (is_null($type)) {
+                switch (true) {
+                    case is_int($value):
+                        $type = PDO::PARAM_INT;
+                        break;
+                    case is_bool($value):
+                        $type = PDO::PARAM_BOOL;
+                        break;
+                    case is_null($value):
+                        $type = PDO::PARAM_NULL;
+                        break;
+                    default:
+                        $type = PDO::PARAM_STR;
+                }
+            }  
+            $this->stmt->bindValue($key, $value, $type);
+        }
     }
 
     public function execute(){
